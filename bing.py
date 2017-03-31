@@ -26,45 +26,45 @@ class TileSystem:
 		return 256 << levelOfDetail
 
 	def GroundResolution(self, latitude, levelOfDetail):
-		latitude = Clip(latitude, self.MinLatitude, self.MaxLatitude)
-		return np.cos(latitude * np.pi / 180.) * 2 * np.pi * self.EarthRadius / MapSize(levelOfDetail)
+		latitude = self.Clip(latitude, self.MinLatitude, self.MaxLatitude)
+		return np.cos(latitude * np.pi / 180.) * 2 * np.pi * self.EarthRadius / self.MapSize(levelOfDetail)
 
 	def MapScale(self, latitude, levelOfDetail, screenDpi):
 		return GroundResolution(latitude, levelOfDetail) * screenDpi / 0.0254;
 
 	def LatLongToPixelXY(self, latitude, longitude, levelOfDetail):
-		latitude = Clip(latitude, self.MinLatitude, self.MaxLatitude);
-		longitude = Clip(longitude, self.MinLongitude, self.MaxLongitude);
+		latitude = self.Clip(latitude, self.MinLatitude, self.MaxLatitude);
+		longitude = self.Clip(longitude, self.MinLongitude, self.MaxLongitude);
 
 		x = (longitude + 180) / 360; 
-		sinLatitude = np.sin(latitude * Math.PI / 180);
+		sinLatitude = np.sin(latitude * np.pi / 180);
 		y = 0.5 - np.log((1 + sinLatitude) / (1 - sinLatitude)) / (4 * np.pi);
 
-		mapSize = MapSize(levelOfDetail);
-		pixelX = Clip(x * mapSize + 0.5, 0, mapSize - 1);
-		pixelY = Clip(y * mapSize + 0.5, 0, mapSize - 1);
+		mapSize = self.MapSize(levelOfDetail);
+		pixelX = self.Clip(x * mapSize + 0.5, 0, mapSize - 1);
+		pixelY = self.Clip(y * mapSize + 0.5, 0, mapSize - 1);
 		
 		return pixelX, pixelY
 
-	def PixelXYToLatLong(pixelX, pixelY, levelOfDetail):
-		mapSize = MapSize(levelOfDetail)
-		x = (Clip(pixelX, 0, mapSize-1) / mapSize) - 0.5
-		y = 0.5 - (Clip(pixelY, 0, mapSize - 1) / mapSize)
+	def PixelXYToLatLong(self, pixelX, pixelY, levelOfDetail):
+		mapSize = self.MapSize(levelOfDetail)
+		x = (self.Clip(pixelX, 0, mapSize-1) / mapSize) - 0.5
+		y = 0.5 - (self.Clip(pixelY, 0, mapSize - 1) / mapSize)
 
-		latitude = 90. - 360. * np.atan(np.exp(-y * 2 * np.pi)) / np.pi
+		latitude = 90. - 360. * np.arctan(np.exp(-y * 2 * np.pi)) / np.pi
 		longitude = 360. * x
 
 		return latitude, longitude
 
-	def PixelXYToTileXY(pixelX, pixelY):
-		return pixelX/256., pixelY/256.
+	def PixelXYToTileXY(self, pixelX, pixelY):
+		return int(pixelX/256), int(pixelY/256)
 
-	def TileXYToPixelXY(tileX, tileY):
-		return tileX*256., tileY*256.
+	def TileXYToPixelXY(self, tileX, tileY):
+		return int(tileX*256), int(tileY*256)
 
-	def TileXYToQuadKey(tileX, tileY, levelOfDetail):
+	def TileXYToQuadKey(self, tileX, tileY, levelOfDetail):
 		quadKey = ''
-		for i in range(levelOfDetail,-1,-1):
+		for i in range(levelOfDetail,0,-1):
 			digit = 0
 			mask = 1 << (i-1)
 			if (tileX & mask) != 0:
@@ -75,10 +75,10 @@ class TileSystem:
 			quadKey += str(digit)
 		return quadKey
 
-	def QuadKeyToTileXY(quadKey):
+	def QuadKeyToTileXY(self, quadKey):
 		tileX = tileY = 0
 		levelOfDetail = len(quadKey)
-		for i in range(levelOfDetail,-1,-1):
+		for i in range(levelOfDetail,0,-1):
 			mask = 1 << (i-1)
 			# if quadKey[levelOfDetail - i] == '0':
 			# 	break
@@ -91,3 +91,4 @@ class TileSystem:
 				tileY |= mask
 			elif quadKey[levelOfDetail - i] != '0':
 				raise Exception('Invalid QuadKey digit sequence.')
+		return tileX, tileY
