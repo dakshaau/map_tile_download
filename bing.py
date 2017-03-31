@@ -44,7 +44,7 @@ class TileSystem:
 		pixelX = self.Clip(x * mapSize + 0.5, 0, mapSize - 1);
 		pixelY = self.Clip(y * mapSize + 0.5, 0, mapSize - 1);
 		
-		return pixelX, pixelY
+		return int(pixelX), int(pixelY)
 
 	def PixelXYToLatLong(self, pixelX, pixelY, levelOfDetail):
 		mapSize = self.MapSize(levelOfDetail)
@@ -58,6 +58,9 @@ class TileSystem:
 
 	def PixelXYToTileXY(self, pixelX, pixelY):
 		return int(pixelX/256), int(pixelY/256)
+
+	def PixelXYToTilePixelXY(self, pixelX, pixelY):
+		return pixelX%256, pixelY%256
 
 	def TileXYToPixelXY(self, tileX, tileY):
 		return int(tileX*256), int(tileY*256)
