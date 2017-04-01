@@ -44,7 +44,7 @@ if __name__ == '__main__':
 	rt_lng = lt_lng
 	bnd_sqr = [(lt_lat, lt_lng), (rt_lat, rt_lng), (lb_lat, lb_lng), (rb_lat, rb_lng)]
 	t = TileSystem()
-	print(t.EarthRadius)
+	# print(t.EarthRadius)
 	emptyImage = cv2.imread('Error.jpeg',0)
 
 	## http://a0.ortho.tiles.virtualearth.net/tiles/a120200223.jpeg?g=2
@@ -102,7 +102,7 @@ if __name__ == '__main__':
 	[os.remove('Images/seq_{}.jpeg'.format(i)) for i in range(4)]
 	# keys = []
 	# print(levels)
-	# print(min_level)
+	print('Selected levelOfDetail: {}'.format(min_level))
 	'''
 	Finding out the maximum common levelOfDetail for the tiles and redownloading accordingly.
 
@@ -136,8 +136,159 @@ if __name__ == '__main__':
 		keys[i] = qKey
 	# print(keys)
 	# print(pixelXY)
+	print('Downlaoded corner tiles.')
 
 	'''
 	Calculating the pixelXY for lat long with
 	'''
+	tb = pixelXY[2][0] - pixelXY[0][0] + 1
+	lr = pixelXY[1][1] - pixelXY[0][1] + 1
+	# print(tb, lr)
 
+	# print(tilePixelXY[0], tilePixelXY[2])
+	# print(tilePixelXY[1], tilePixelXY[3])
+	tileD_tb = (256-tilePixelXY[0][0]) + tilePixelXY[2][0] + 1
+	tileD_lr = (256-tilePixelXY[0][1]) + tilePixelXY[1][1] + 1
+
+	if (tileXY[1][1] - tileXY[0][1]) > 1 and (tileXY[2][0] - tileXY[0][0]) > 1:
+		tb -= tileD_tb
+		lr -= tileD_lr
+	elif (tileXY[1][1] - tileXY[0][1]) > 1:
+		lr -= tileD_lr
+		tb = 0
+	elif (tileXY[2][0] - tileXY[0][0]) > 1:
+		tb -= tileD_tb
+		lr = 0
+	else:
+		tb = 0
+		lr = 0
+
+	# print(tb/256, lr/256)
+	if tb > 20000 or lr > 20000:
+		print(int(tb/256), int(lr/256))
+		print('Too many tiles. Reduce the bounding rectangle area!')
+		exit(0)
+
+	num_tiles_lr = int(lr/256)
+	num_tiles_tb = int(tb/256)
+
+
+	if num_tiles_tb > 0 and num_tiles_lr > 0:
+		prog = 0.
+		tot = (num_tiles_lr+2)*(num_tiles_tb+2)
+		count = 0.
+		print('Downloading remaining tiles, {} ...'.format(tot))
+		for i in range(0,num_tiles_tb+2):
+			tx = tileXY[0][0] + i
+			for j in range(0,num_tiles_lr+2):
+				ty = tileXY[0][1] + j
+				qKey = t.TileXYToQuadKey(tx, ty, min_level)
+				fileName = '{},{}'.format(tx,ty)
+				file = open('Images/seq_{}.jpeg'.format(fileName),'wb')
+				response = requests.get('http://a0.ortho.tiles.virtualearth.net/tiles/a{}.jpeg?g=2'.format(qKey), stream=True)
+
+				if not response.ok:
+					# Something went wrong
+					print('Invalid depth')
+
+				for block in response.iter_content(1024):
+					file.write(block)
+				count += 1.
+				prog = (count/tot) * 100
+				print('\rCompleted: {:.2f}%'.format(prog),end=' ')
+		print()
+
+	elif num_tiles_tb > 0:
+		prog = 0.
+		tot = num_tiles_tb
+		count = 0.
+		print('Downloading remaining tiles, {} ...'.format(tot))
+		for i in range(1,num_tiles_tb+1):
+			tx = tileXY[0][0] + i
+			ty = tileXY[0][1]
+			qKey = t.TileXYToQuadKey(tx, ty, min_level)
+			fileName = '{},{}'.format(tx,ty)
+			file = open('Images/seq_{}.jpeg'.format(fileName),'wb')
+			response = requests.get('http://a0.ortho.tiles.virtualearth.net/tiles/a{}.jpeg?g=2'.format(qKey), stream=True)
+
+			if not response.ok:
+				# Something went wrong
+				print('Invalid depth')
+
+			for block in response.iter_content(1024):
+				file.write(block)
+			count += 1.
+			prog = (count/tot) * 100
+			print('\rCompleted: {:.2f}%'.format(prog),end=' ')
+		print()
+
+	elif num_tiles_lr > 0:
+		prog = 0.
+		tot = num_tiles_lr
+		count = 0.
+		print('Downloading remaining tiles, {} ...'.format(tot))
+		for i in range(1,num_tiles_lr+1):
+			tx = tileXY[0][0]
+			ty = tileXY[0][1] + i
+			qKey = t.TileXYToQuadKey(tx, ty, min_level)
+			fileName = '{},{}'.format(tx,ty)
+			file = open('Images/seq_{}.jpeg'.format(fileName),'wb')
+			response = requests.get('http://a0.ortho.tiles.virtualearth.net/tiles/a{}.jpeg?g=2'.format(qKey), stream=True)
+
+			if not response.ok:
+				# Something went wrong
+				print('Invalid depth')
+
+			for block in response.iter_content(1024):
+				file.write(block)
+			count += 1.
+			prog = (count/tot) * 100
+			print('\rCompleted: {:.2f}%'.format(prog),end=' ')
+		print()
+
+	print('Stitching together images ...')
+
+	_, __, files = list(os.walk('Images'))[0]
+	# print(len(files))
+	files.sort(key = lambda x: (int(x.split(',')[0].split('_')[-1]), int(x.split(',')[1].split('.')[0])))
+	# print(files[0])
+	tilX = lambda x: int(x.split(',')[0].split('_')[-1])
+	tilY = lambda x: int(x.split(',')[1].split('.')[0])
+	Xs = sorted(list(set([tilX(x) for x in files])))
+	Ys = sorted(list(set([tilY(x) for x in files])))
+	fin_img = None
+	vertical = None
+	prev_x = None
+	count = 0.
+	tot = len(Xs)*len(Ys)
+	prog = 0.
+	for x in Xs:
+		vertical = None
+		for y in Ys:
+			img = cv2.imread('Images/seq_{},{}.jpeg'.format(x,y))
+			if vertical is None:
+				vertical = img
+			else:
+				vertical = np.concatenate((vertical, img), axis=0)
+			count+=1.
+			prog = count/tot * 100
+			print('\rCompleted: {:.2f}%'.format(prog),end=' ')
+		if fin_img is None:
+			fin_img = vertical
+		else:
+			fin_img = np.concatenate((fin_img, vertical), axis=1)
+		
+	print()
+	print()
+	h,w = fin_img.shape[:2]
+	re_img = None
+	ratio = float(h/w)
+	re_img = cv2.resize(fin_img, (720 , int(ratio*720)))
+	while True:
+		key = cv2.waitKey(10)
+		if key == 27:
+			break
+		cv2.imshow('StitchedImage',re_img)
+	fin_img = fin_img[tilePixelXY[0][0]:-tilePixelXY[2][0], tilePixelXY[0][1]:-tilePixelXY[1][1], :]
+	cv2.imwrite('ArielView.jpeg',fin_img)
+	print('Saved image at: {}'.format(os.path.abspath('ArielView.jpeg')))
