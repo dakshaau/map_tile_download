@@ -1,12 +1,12 @@
-Bing Map Tile Downlaod
+#Bing Map Tile Downlaod
 
-Language: Python 3.6
+###Language: Python 3.6
 
-Input: Top Latitude, Top Longitude, Bottom Latitude, Bottom Longitude
+###Input: Top Latitude, Top Longitude, Bottom Latitude, Bottom Longitude
 
-Output: Image bounded by Latitude Longitude rectangle
+###Output: Image bounded by Latitude Longitude rectangle
 
-Running instructions:
+###Running instructions:
 
 main.py downloads the relevant map tiles from Bing servers
 
