@@ -14,9 +14,9 @@ main.py downloads the relevant map tiles from Bing servers
 python main.py <top_lat> <top_long> <bottom_lat> <bottom_long>
 ```
 
-After all the tiles have been downloaded, run stichTiles.py to mergr files
+After all the tiles have been downloaded, run stitchTiles.py to merge files
 and then crop it to fit the bounding rectangle
 
 ```Batchfile
-python stichTiles.py
+python stitchTiles.py
 ```
