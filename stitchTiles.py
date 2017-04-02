@@ -51,7 +51,7 @@ if __name__ == '__main__':
 	f = open('params.dat','r')
 	params = f.readlines()[0]
 	params.strip()
-	tr, br, tc, bc = [int(x) for x in params.split(' ')]
-	fin_img = fin_img[tr:br, tc:bc, :]
+	tc, bc, tr, br = [int(x) for x in params.split(' ')]
+	fin_img = fin_img[tr:-br, tc:-bc, :]
 	cv2.imwrite('ArielView.jpeg',fin_img)
 	print('Saved image at: {}'.format(os.path.abspath('ArielView.jpeg')))

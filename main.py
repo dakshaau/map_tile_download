@@ -144,6 +144,7 @@ if __name__ == '__main__':
 		keys[i] = qKey
 	# print(keys)
 	# print(pixelXY)
+	# print(tilePixelXY)
 	print('Downlaoded corner tiles.')
 
 	'''
@@ -256,7 +257,7 @@ if __name__ == '__main__':
 		print()
 
 	file = open('params.dat','w')
-	file.write('{} {} {} {}'.format(tilePixelXY[0][0], -tilePixelXY[2][0], tilePixelXY[0][1], -tilePixelXY[1][1]))
+	file.write('{} {} {} {}'.format(tilePixelXY[0][0], 256-tilePixelXY[2][0], tilePixelXY[0][1], 256-tilePixelXY[1][1]))
 	file.close()
 	# time.sleep(6)
 
