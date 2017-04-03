@@ -23,6 +23,11 @@ if __name__ == '__main__':
 	If the above condition doesn't hold then the coodinated need to be swaped
 	accordingly
 	'''
+
+	if lt_lat == rb_lat or lt_lng == rb_lng:
+		print('Cannot accept equal latitude or longitude pairs.\nTry with a different combination')
+		exit(0)
+
 	if lt_lat > rb_lat and lt_lng > rb_lng:
 		temp = lt_lng
 		lt_lng = rb_lng
@@ -44,6 +49,7 @@ if __name__ == '__main__':
 	rt_lat = rb_lat
 	rt_lng = lt_lng
 	bnd_sqr = [(lt_lat, lt_lng), (rt_lat, rt_lng), (lb_lat, lb_lng), (rb_lat, rb_lng)]
+	# print(bnd_sqr)
 	t = TileSystem()
 	# print(t.EarthRadius)
 	emptyImage = cv2.imread('Error.jpeg',0)
@@ -180,6 +186,7 @@ if __name__ == '__main__':
 
 	num_tiles_lr = int(lr/256)
 	num_tiles_tb = int(tb/256)
+	# print(num_tiles_tb, num_tiles_lr)
 
 
 	if num_tiles_tb > 0 and num_tiles_lr > 0:

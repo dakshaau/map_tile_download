@@ -40,8 +40,12 @@ if __name__ == '__main__':
 	cv2.imwrite('ArielView_org.jpeg',fin_img)
 	h,w = fin_img.shape[:2]
 	re_img = None
-	ratio = float(h/w)
-	re_img = cv2.resize(fin_img, (720 , int(ratio*720)))
+	if h <= w:
+		ratio = float(h/w)
+		re_img = cv2.resize(fin_img, (720 , int(ratio*720)))
+	else:
+		ratio = float(w/h)
+		re_img = cv2.resize(fin_img, (int(ratio*720) , 720))
 	while True:
 		key = cv2.waitKey(10)
 		if key == 27:
