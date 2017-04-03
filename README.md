@@ -8,7 +8,10 @@
 
 ### Running instructions:
 
-main.py downloads the relevant map tiles from Bing servers. You need adminitrator priviledges for this
+main.py downloads the relevant map tiles from Bing servers. You need adminsitrator priviledges for this
+
+**NOTE:** The maximum image resolution can be 20,512 X 20,512 pixels. If the maximum possible resolution
+          for the complete image is greater than this, the code will discard the lat long pairs.
 
 ```Batchfile
 python main.py <top_lat> <top_long> <bottom_lat> <bottom_long>
@@ -20,3 +23,5 @@ and then crop it to fit the bounding rectangle
 ```Batchfile
 python stitchTiles.py
 ```
+
+Press `ESC` to close the display image and save cropped image.
