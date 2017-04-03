@@ -8,7 +8,7 @@
 
 ### Running instructions:
 
-main.py downloads the relevant map tiles from Bing servers
+main.py downloads the relevant map tiles from Bing servers. You need adminitrator priviledges for this
 
 ```Batchfile
 python main.py <top_lat> <top_long> <bottom_lat> <bottom_long>
